@@ -248,7 +248,7 @@
           theme: giscusTheme,
         }
       };
-      giscus.style.cssText += 'color-scheme: normal;';
+      //giscus.style.cssText += 'color-scheme: normal;';
       giscus.contentWindow.postMessage({ 'giscus': message }, 'https://giscus.app');
     }
   }
@@ -279,8 +279,8 @@
     }
   });
 
-  Fluid.utils.waitElementLoaded(iframeSelector, function() {
-    applyCustomColorSchemaSettings();
-  });
+  // Fluid.utils.waitElementLoaded(iframeSelector, function() {
+  //   applyCustomColorSchemaSettings();
+  // });
   
 })(window, document);
