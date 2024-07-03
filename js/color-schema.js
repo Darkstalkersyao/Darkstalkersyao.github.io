@@ -279,8 +279,8 @@
     }
   });
 
-  // Fluid.utils.waitElementLoaded(iframeSelector, function() {
-  //   applyCustomColorSchemaSettings();
-  // });
+  Fluid.utils.waitElementLoaded(iframeSelector, function() {
+    applyCustomColorSchemaSettings();
+  });
   
 })(window, document);
