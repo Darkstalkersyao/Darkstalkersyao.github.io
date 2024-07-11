@@ -4,7 +4,20 @@
   
   
   <entry>
-    <title>欢迎来到理塘</title>
+    <title>欢迎来到我的博客*</title>
+    <link href="/2024/07/10/hello-world%20copy/"/>
+    <url>/2024/07/10/hello-world%20copy/</url>
+    
+    <content type="html"><![CDATA[<p><strong>计划在这里写一些东西</strong></p><p><em><strong>一直想整个博客记录一些东西</strong></em></p><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">健忘<br></code></pre></td></tr></table></figure><p><code>碰巧看到了Hexo</code></p><p>原来建立博客这么轻松</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Welcome to Hexo</title>
     <link href="/2024/07/02/hello-world/"/>
     <url>/2024/07/02/hello-world/</url>
     
