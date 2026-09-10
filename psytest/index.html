@@ -3,438 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>心理压力自测</title>
+<title>趣味测试</title>
 <style>
+  /* 配色对齐 Fluid 主题，支持暗色模式 */
+  :root {
+    --bg: #eee;
+    --board: #fff;
+    --text: #3c4858;
+    --heading: #1a202c;
+    --sec: #718096;
+    --accent: #2f4154;
+    --link: #0366d6;
+    --line: #eaecef;
+    --btn: #f6f8fa;
+    --btn-hover: #f2f3f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181c27;
+      --board: #252d38;
+      --text: #c4c6c9;
+      --heading: #c4c6c9;
+      --sec: #a7a9ad;
+      --accent: #1f3144;
+      --link: #1589e9;
+      --line: #435266;
+      --btn: #2f4154;
+      --btn-hover: #46647e;
+    }
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.02em;
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bg);
+    color: var(--text);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    padding: 24px 16px;
-    color: #2c3e50;
+    padding: 48px 16px 64px;
+    transition: background-color .2s ease-in-out, color .2s ease-in-out;
   }
 
-  .card {
-    background: #fff;
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: #30a9de; }
+
+  .back-home { align-self: flex-start; margin-bottom: 20px; font-size: 14px; }
+
+  .board {
+    background: var(--board);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .15), 0 12px 40px rgba(0, 0, 0, .12);
     width: 100%;
     max-width: 640px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
     padding: 40px 36px;
-    min-height: 480px;
+    transition: background-color .2s ease-in-out;
   }
 
-  /* 屏幕切换 */
-  .screen { display: none; animation: fadeIn .35s ease; }
-  .screen.active { display: block; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  header.page-head { text-align: center; margin-bottom: 32px; }
+  header.page-head h1 {
+    color: var(--heading);
+    font-size: 26px;
+    margin-bottom: 8px;
   }
+  header.page-head p { color: var(--sec); font-size: 14px; line-height: 1.7; }
 
-  /* 开始页 */
-  .brand { text-align: center; margin-bottom: 28px; }
-  .brand .icon {
-    width: 72px; height: 72px;
-    margin: 0 auto 16px;
+  .cards { display: flex; flex-direction: column; gap: 18px; }
+
+  .test-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 24px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+  }
+  .test-card:hover {
+    border-color: var(--link);
+    color: var(--heading);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .1);
+  }
+  .test-card .icon {
+    width: 56px; height: 56px;
+    flex-shrink: 0;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--accent);
     display: flex; align-items: center; justify-content: center;
   }
-  .brand .icon svg { width: 36px; height: 36px; fill: #fff; }
-  .brand h1 { font-size: 26px; margin-bottom: 8px; }
-  .brand p { color: #7f8c9b; line-height: 1.7; font-size: 15px; }
+  .test-card .icon svg { width: 28px; height: 28px; fill: #fff; }
 
-  .meta {
-    display: flex; justify-content: center; gap: 12px;
-    margin: 24px 0;
-  }
-  .meta span {
-    background: #f0f2f8;
-    color: #667eea;
-    font-size: 13px;
-    padding: 6px 14px;
-    border-radius: 999px;
-  }
+  .test-card .body { flex: 1; min-width: 0; }
+  .test-card .body h2 { font-size: 18px; color: var(--heading); margin-bottom: 6px; }
+  .test-card .body p { font-size: 13px; color: var(--sec); line-height: 1.6; }
 
-  .notice {
-    background: #f7f8fc;
-    border-left: 3px solid #667eea;
-    border-radius: 6px;
-    padding: 14px 16px;
-    font-size: 13px;
-    color: #7f8c9b;
-    line-height: 1.7;
-    margin-bottom: 28px;
-  }
-
-  /* 按钮 */
-  .btn {
-    display: block;
-    width: 100%;
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all .2s ease;
-    font-family: inherit;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 2px;
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(102, 126, 234, .4); }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid #d8dce8;
-    color: #7f8c9b;
-    width: auto;
-    padding: 10px 22px;
-    font-size: 14px;
-  }
-  .btn-ghost:hover { border-color: #667eea; color: #667eea; }
-  .btn-ghost:disabled { opacity: .4; cursor: not-allowed; }
-
-  /* 答题页 */
-  .progress-info {
-    display: flex; justify-content: space-between;
-    font-size: 13px; color: #7f8c9b;
-    margin-bottom: 10px;
-  }
-  .progress-bar {
-    height: 6px;
-    background: #eef0f6;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 32px;
-  }
-  .progress-bar .fill {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 3px;
-    transition: width .3s ease;
-  }
-
-  .question { font-size: 20px; font-weight: 600; line-height: 1.6; margin-bottom: 28px; }
-
-  .options { display: flex; flex-direction: column; gap: 12px; }
-  .option {
-    display: flex; align-items: center; gap: 14px;
-    padding: 15px 18px;
-    background: #f7f8fc;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all .18s ease;
-    font-size: 15px;
-    text-align: left;
-    font-family: inherit;
-    color: #2c3e50;
-  }
-  .option:hover { background: #eef1fb; border-color: #b6c3f5; }
-  .option.selected {
-    background: #eef1fb;
-    border-color: #667eea;
-    font-weight: 600;
-  }
-  .option .dot {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    border: 2px solid #c6cde0;
-    flex-shrink: 0;
-    position: relative;
-    transition: all .18s ease;
-  }
-  .option.selected .dot { border-color: #667eea; }
-  .option.selected .dot::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    background: #667eea;
-  }
-
-  .quiz-footer {
-    display: flex; justify-content: space-between;
-    margin-top: 32px;
-  }
-
-  /* 结果页 */
-  .result { text-align: center; }
-  .score-wrap { position: relative; width: 150px; height: 150px; margin: 8px auto 20px; }
-  .score-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .ring-bg { fill: none; stroke: #eef0f6; stroke-width: 10; }
-  .ring {
-    fill: none;
-    stroke-width: 10;
-    stroke-linecap: round;
-    stroke-dasharray: 377;
-    stroke-dashoffset: 377;
-    transition: stroke-dashoffset 1s ease, stroke .3s ease;
-  }
-  .score-num {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-  }
-  .score-num .num { font-size: 38px; font-weight: 700; line-height: 1; }
-  .score-num .total { font-size: 13px; color: #a0aab8; margin-top: 4px; }
-
-  .level-badge {
-    display: inline-block;
-    padding: 6px 18px;
-    border-radius: 999px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
-  .result h2 { font-size: 22px; margin-bottom: 16px; }
-  .result .desc {
-    text-align: left;
-    background: #f7f8fc;
-    border-radius: 12px;
-    padding: 20px;
-    font-size: 15px;
-    line-height: 1.9;
-    color: #5a6779;
-    margin-bottom: 20px;
-  }
-  .result .desc ul { padding-left: 20px; margin-top: 10px; }
-  .result .desc li { margin-bottom: 6px; }
-  .disclaimer {
+  .test-card .meta { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .test-card .meta span {
     font-size: 12px;
-    color: #a0aab8;
-    margin-top: 18px;
-    line-height: 1.6;
+    color: var(--link);
+    background: var(--btn);
+    border-radius: 999px;
+    padding: 3px 10px;
+  }
+
+  .test-card .arrow { color: var(--sec); font-size: 20px; flex-shrink: 0; }
+
+  footer.note {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--sec);
+    line-height: 1.8;
   }
 
   @media (max-width: 480px) {
-    .card { padding: 30px 22px; }
-    .question { font-size: 18px; }
+    .board { padding: 28px 20px; }
+    .test-card { padding: 18px 16px; gap: 14px; }
+    .test-card .icon { width: 48px; height: 48px; }
   }
 </style>
 </head>
 <body>
-<div class="card">
 
-  <!-- 开始页 -->
-  <div class="screen active" id="screen-start">
-    <div class="brand">
+<a class="back-home" href="/">← 返回博客</a>
+
+<div class="board">
+  <header class="page-head">
+    <h1>趣味测试</h1>
+    <p>两个轻松的小测试：一个帮你觉察近期的压力状态，<br>一个纯属娱乐的每日运势抽签。</p>
+  </header>
+
+  <div class="cards">
+    <a class="test-card" href="stress/">
       <div class="icon">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
       </div>
-      <h1>心理压力自测</h1>
-      <p>回想一下最近一个月的状态，<br>选择最符合你真实感受的选项。</p>
-    </div>
-    <div class="meta">
-      <span>共 10 题</span><span>约 2 分钟</span><span>结果仅自己可见</span>
-    </div>
-    <div class="notice">
-      本测试基于知觉压力量表（PSS）的思路改编，仅供自我觉察参考，
-      不构成任何医学诊断。如果你长期感到明显不适，请及时寻求专业心理咨询或就医。
-    </div>
-    <button class="btn btn-primary" onclick="startQuiz()">开始测试</button>
-  </div>
-
-  <!-- 答题页 -->
-  <div class="screen" id="screen-quiz">
-    <div class="progress-info">
-      <span id="progress-text">第 1 / 10 题</span>
-      <span id="progress-percent">10%</span>
-    </div>
-    <div class="progress-bar"><div class="fill" id="progress-fill"></div></div>
-
-    <div class="question" id="question-text"></div>
-    <div class="options" id="options"></div>
-
-    <div class="quiz-footer">
-      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()">上一题</button>
-      <button class="btn btn-ghost" id="btn-next" onclick="nextQuestion()" disabled>下一题</button>
-    </div>
-  </div>
-
-  <!-- 结果页 -->
-  <div class="screen" id="screen-result">
-    <div class="result">
-      <div class="score-wrap">
-        <svg viewBox="0 0 130 130">
-          <circle class="ring-bg" cx="65" cy="65" r="60"/>
-          <circle class="ring" id="score-ring" cx="65" cy="65" r="60"/>
-        </svg>
-        <div class="score-num">
-          <span class="num" id="score-num">0</span>
-          <span class="total">/ 40 分</span>
-        </div>
+      <div class="body">
+        <h2>心理压力自测</h2>
+        <p>基于知觉压力量表（PSS）思路改编，帮你觉察最近一个月的状态，给出对应建议。</p>
+        <div class="meta"><span>10 题</span><span>约 2 分钟</span><span>结果仅自己可见</span></div>
       </div>
-      <div class="level-badge" id="level-badge">压力水平：较低</div>
-      <h2 id="level-title"></h2>
-      <div class="desc" id="level-desc"></div>
-      <button class="btn btn-primary" onclick="restart()">重新测试</button>
-      <p class="disclaimer">
-        以上结果仅基于简易自评量表生成，不能替代专业评估。<br>
-        如有需要，请咨询心理专业人士。
-      </p>
-    </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="test-card" href="fortune/">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.3 5.8.5-4.4 3.8 1.3 5.7L12 14.2l-5.1 3.1 1.3-5.7L3.8 7.8l5.8-.5L12 2zm0 15.5l1.8 2.8-1.8 4-1.8-4 1.8-2.8z"/></svg>
+      </div>
+      <div class="body">
+        <h2>今日运势灵签</h2>
+        <p>回答几个轻松的小问题，摇一摇签筒，抽取属于你今天的运势签：宜、忌、幸运色与解语。</p>
+        <div class="meta"><span>5 题 · 24 题库随机抽</span><span>约 1 分钟</span><span>纯属娱乐</span></div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
   </div>
 
+  <footer class="note">
+    测试结果均由页面本地计算，不会上传任何数据。<br>
+    压力自测仅供自我觉察参考，不能替代专业评估。
+  </footer>
 </div>
 
-<script>
-  // ===== 测试数据：按需替换题目即可 =====
-  const QUESTIONS = [
-    '最近一个月，你是否经常感到事情超出了自己的控制？',
-    '最近一个月，你是否经常因意外发生的事情而感到心烦？',
-    '最近一个月，你是否经常感到紧张、焦虑或烦躁不安？',
-    '最近一个月，你是否经常觉得困难堆积得无法克服？',
-    '最近一个月，你是否经常因琐事（排队、噪音、打扰）感到恼火？',
-    '最近一个月，你是否经常感到疲惫、精力不足？',
-    '最近一个月，你是否经常难以集中注意力？',
-    '最近一个月，你的睡眠质量如何（入睡困难、易醒、早醒）？',
-    '最近一个月，你是否对工作或学习失去兴趣和动力？',
-    '最近一个月，你是否经常感到孤独，或不愿与人交流？'
-  ];
-
-  const OPTIONS = [
-    { label: '从不', score: 1 },
-    { label: '偶尔', score: 2 },
-    { label: '经常', score: 3 },
-    { label: '总是', score: 4 }
-  ];
-
-  // 结果区间（总分 10~40）
-  const RESULTS = [
-    {
-      max: 16, color: '#22a06b', level: '较低', title: '你的状态很平稳',
-      desc: '目前你的压力水平处于较低区间，情绪状态总体平稳，具备良好的自我调节能力，能够从容应对日常的工作与生活。',
-      tips: ['保持规律的作息和运动习惯', '维持现有的社交与兴趣爱好', '继续留意自己的情绪变化']
-    },
-    {
-      max: 24, color: '#3b82f6', level: '中等', title: '压力适中，注意调节',
-      desc: '目前你的压力水平处于中等区间。适度的压力可以成为动力，但如果不加以调节，可能会逐渐累积影响状态。',
-      tips: ['每天留出一段完全属于自己的放松时间', '尝试深呼吸、冥想或轻度运动释放压力', '向信任的朋友倾诉，不要独自硬扛']
-    },
-    {
-      max: 32, color: '#f59e0b', level: '较高', title: '压力偏大，需要主动调整',
-      desc: '目前你的压力水平处于较高区间，身心可能已经持续紧绷了一段时间，注意力、睡眠或情绪可能受到了影响，建议认真对待。',
-      tips: ['梳理压力来源，砍掉可做可不做的负担', '优先修复睡眠，睡前远离电子屏幕', '每天进行 30 分钟以上的有氧运动', '主动寻求家人朋友的支持']
-    },
-    {
-      max: 40, color: '#ef4444', level: '过高', title: '压力过载，请及时求助',
-      desc: '目前你的压力水平处于过高区间，身心可能已经处于超负荷状态。这不是软弱的表现，而是身体在提醒你需要休息和帮助。建议尽快做出调整，必要时寻求专业支持。',
-      tips: ['考虑暂停或减少当前的高强度任务', '尽快与家人、朋友或导师沟通现状', '寻求专业心理咨询（学校心理中心或正规机构）', '如出现持续失眠、情绪低落，请及时就医']
-    }
-  ];
-
-  // ===== 状态与渲染 =====
-  let current = 0;          // 当前题号
-  let answers = [];         // 每题得分，null 表示未作答
-
-  const $ = id => document.getElementById(id);
-
-  function switchScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    $(id).classList.add('active');
-  }
-
-  function startQuiz() {
-    current = 0;
-    answers = new Array(QUESTIONS.length).fill(null);
-    renderQuestion();
-    switchScreen('screen-quiz');
-  }
-
-  function renderQuestion() {
-    const total = QUESTIONS.length;
-    $('question-text').textContent = QUESTIONS[current];
-
-    // 进度条与计数
-    $('progress-text').textContent = `第 ${current + 1} / ${total} 题`;
-    const percent = Math.round((current + 1) / total * 100);
-    $('progress-percent').textContent = percent + '%';
-    $('progress-fill').style.width = percent + '%';
-
-    // 选项
-    $('options').innerHTML = OPTIONS.map((opt, i) => `
-      <button class="option ${answers[current] === opt.score ? 'selected' : ''}"
-              onclick="selectOption(${i})">
-        <span class="dot"></span><span>${opt.label}</span>
-      </button>`).join('');
-
-    // 底部按钮
-    $('btn-prev').disabled = current === 0;
-    const isLast = current === total - 1;
-    const answered = answers[current] !== null;
-    const nextBtn = $('btn-next');
-    nextBtn.textContent = isLast ? '查看测试结果' : '下一题';
-    nextBtn.disabled = !answered;
-  }
-
-  function selectOption(i) {
-    answers[current] = OPTIONS[i].score;
-    renderQuestion();
-    // 非最后一题：短暂高亮后自动前进
-    if (current < QUESTIONS.length - 1) {
-      setTimeout(() => { current++; renderQuestion(); }, 260);
-    }
-  }
-
-  function nextQuestion() {
-    if (answers[current] === null) return;
-    if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
-    else showResult();
-  }
-
-  function prevQuestion() {
-    if (current > 0) { current--; renderQuestion(); }
-  }
-
-  // ===== 结果计算与展示 =====
-  function showResult() {
-    const total = answers.reduce((sum, s) => sum + s, 0);
-    const result = RESULTS.find(r => total <= r.max);
-
-    // 徽章与文案
-    const badge = $('level-badge');
-    badge.textContent = '压力水平：' + result.level;
-    badge.style.background = result.color;
-
-    $('level-title').textContent = result.title;
-    $('level-desc').innerHTML = result.desc + '<br><b>建议：</b><ul>' +
-      result.tips.map(t => `<li>${t}</li>`).join('') + '</ul>';
-
-    // 分数环（周长 2πr ≈ 377）
-    const ring = $('score-ring');
-    ring.style.stroke = result.color;
-    setTimeout(() => {
-      ring.style.strokeDashoffset = 377 * (1 - total / 40);
-    }, 100);
-
-    // 数字滚动动画
-    const numEl = $('score-num');
-    let shown = 0;
-    const timer = setInterval(() => {
-      shown++;
-      numEl.textContent = shown;
-      if (shown >= total) clearInterval(timer);
-    }, 1000 / Math.max(total, 1) * 0.8);
-
-    switchScreen('screen-result');
-  }
-
-  function restart() {
-    switchScreen('screen-start');
-  }
-</script>
 </body>
 </html>

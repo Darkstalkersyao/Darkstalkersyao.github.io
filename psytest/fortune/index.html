@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日运势灵签</title>
+<style>
+  /* 配色对齐 Fluid 主题，支持暗色模式 */
+  :root {
+    --bg: #eee;
+    --board: #fff;
+    --text: #3c4858;
+    --heading: #1a202c;
+    --sec: #718096;
+    --accent: #2f4154;
+    --link: #0366d6;
+    --line: #eaecef;
+    --btn: #f6f8fa;
+    --btn-hover: #f2f3f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181c27;
+      --board: #252d38;
+      --text: #c4c6c9;
+      --heading: #c4c6c9;
+      --sec: #a7a9ad;
+      --accent: #1f3144;
+      --link: #1589e9;
+      --line: #435266;
+      --btn: #2f4154;
+      --btn-hover: #46647e;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 16px 64px;
+    transition: background-color .2s ease-in-out, color .2s ease-in-out;
+  }
+
+  .back-home { align-self: flex-start; margin-bottom: 20px; font-size: 14px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: #30a9de; }
+
+  .board {
+    background: var(--board);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .15), 0 12px 40px rgba(0, 0, 0, .12);
+    width: 100%;
+    max-width: 640px;
+    padding: 40px 36px;
+    transition: background-color .2s ease-in-out;
+  }
+
+  .screen { display: none; animation: fadeIn .35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- 开始页 ---- */
+  .brand { text-align: center; margin-bottom: 26px; }
+  .brand .star {
+    width: 64px; height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand .star svg { width: 32px; height: 32px; fill: #fff; }
+  .brand h1 { font-size: 24px; color: var(--heading); margin-bottom: 8px; }
+  .brand p { color: var(--sec); line-height: 1.7; font-size: 14px; }
+
+  .chips { display: flex; justify-content: center; gap: 10px; margin: 20px 0 24px; }
+  .chips span {
+    background: var(--btn);
+    color: var(--link);
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 999px;
+  }
+
+  .notice {
+    background: var(--btn);
+    border-left: 3px solid var(--link);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--sec);
+    line-height: 1.7;
+    margin-bottom: 26px;
+  }
+
+  /* ---- 按钮 ---- */
+  .btn {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    padding: 13px;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .2s ease-in-out;
+  }
+  .btn-primary { background: var(--link); color: #fff; font-weight: 600; }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    background: var(--btn);
+    color: var(--text);
+    width: auto;
+    padding: 9px 20px;
+    font-size: 14px;
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--btn-hover); }
+  .btn-ghost:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ---- 答题页 ---- */
+  .progress-info {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--sec); margin-bottom: 10px;
+  }
+  .progress-bar {
+    height: 5px; background: var(--line);
+    border-radius: 3px; overflow: hidden; margin-bottom: 30px;
+  }
+  .progress-bar .fill {
+    height: 100%; width: 0;
+    background: var(--link);
+    border-radius: 3px;
+    transition: width .3s ease;
+  }
+  .question { font-size: 19px; font-weight: 600; color: var(--heading); line-height: 1.6; margin-bottom: 26px; }
+  .options { display: flex; flex-direction: column; gap: 11px; }
+  .option {
+    display: flex; align-items: center; gap: 13px;
+    padding: 14px 17px;
+    background: var(--btn);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    transition: all .18s ease;
+  }
+  .option:hover { border-color: var(--link); background: var(--btn-hover); }
+  .option.selected { border-color: var(--link); color: var(--heading); font-weight: 600; }
+  .option .dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--line); flex-shrink: 0;
+    position: relative; transition: border-color .18s ease;
+  }
+  .option.selected .dot { border-color: var(--link); }
+  .option.selected .dot::after {
+    content: ''; position: absolute; inset: 4px;
+    border-radius: 50%; background: var(--link);
+  }
+  .quiz-footer { display: flex; justify-content: space-between; margin-top: 30px; }
+
+  /* ---- 抽签页 ---- */
+  .draw-stage { text-align: center; padding: 8px 0 4px; }
+  .draw-stage h2 { color: var(--heading); font-size: 20px; margin-bottom: 8px; }
+  .draw-stage p.hint { color: var(--sec); font-size: 14px; margin-bottom: 8px; }
+
+  .tube-wrap { position: relative; width: 130px; height: 175px; margin: 18px auto 26px; }
+  .tube {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 88px; height: 100px;
+    background: var(--accent);
+    border-radius: 8px 8px 28px 28px;
+    box-shadow: inset 0 -10px 0 rgba(0, 0, 0, .22), 0 6px 14px rgba(0, 0, 0, .18);
+    z-index: 2;
+  }
+  .stick {
+    position: absolute; bottom: 88px; left: 50%;
+    width: 7px; height: 62px;
+    background: #efe3c8;
+    border-radius: 3px 3px 0 0;
+    z-index: 1;
+    transform-origin: bottom center;
+  }
+  .stick::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 15px; background: #b5493c; border-radius: 3px 3px 0 0;
+  }
+  .stick.s1 { height: 58px; transform: translateX(-30px) rotate(-10deg); }
+  .stick.s2 { height: 66px; transform: translateX(-15px) rotate(-5deg); }
+  .stick.s3 { height: 62px; transform: translateX(0); }
+  .stick.s4 { height: 68px; transform: translateX(15px) rotate(5deg); }
+  .stick.s5 { height: 60px; transform: translateX(30px) rotate(10deg); }
+
+  @keyframes tubeShake {
+    0%, 100% { transform: translateX(-50%) rotate(0); }
+    15% { transform: translateX(-62%) rotate(-9deg); }
+    30% { transform: translateX(-38%) rotate(8deg); }
+    45% { transform: translateX(-60%) rotate(-7deg); }
+    60% { transform: translateX(-40%) rotate(6deg); }
+    75% { transform: translateX(-56%) rotate(-4deg); }
+    90% { transform: translateX(-44%) rotate(3deg); }
+  }
+  @keyframes stickWobble {
+    0%, 100% { margin-bottom: 0; }
+    50% { margin-bottom: 8px; }
+  }
+  .drawing .tube { animation: tubeShake .55s ease-in-out 3; }
+  .drawing .stick { animation: stickWobble .3s ease-in-out 6; }
+
+  /* ---- 结果：签纸 ---- */
+  .omikuji {
+    background: #fbf6ea;
+    border: 1px solid #e2d5b4;
+    border-radius: 6px;
+    padding: 26px 24px 24px;
+    color: #4a4234;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .14);
+    position: relative;
+    animation: pop .5s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(.85) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .omikuji .top-noise {
+    text-align: center; font-size: 12px; color: #a0977f;
+    letter-spacing: .35em; margin-bottom: 14px;
+  }
+  .omikuji .stamp {
+    position: absolute; top: 14px; right: 14px;
+    border: 3px solid;
+    padding: 5px 11px;
+    font-weight: 700;
+    font-size: 19px;
+    border-radius: 4px;
+    transform: rotate(8deg);
+    letter-spacing: .12em;
+  }
+  .omikuji h2 {
+    text-align: center; font-size: 22px; color: #8a6d3b;
+    letter-spacing: .2em; margin-bottom: 16px;
+  }
+  .omikuji .stars {
+    display: flex; justify-content: center; gap: 5px; margin-bottom: 18px;
+  }
+  .omikuji .stars svg { width: 20px; height: 20px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .grid .cell {
+    background: rgba(138, 109, 59, .08);
+    border-radius: 6px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .cell .label { font-size: 12px; color: #a0977f; margin-bottom: 6px; }
+  .cell .val { font-size: 17px; font-weight: 600; color: #4a4234; }
+  .cell .val .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #8a6d3b; color: #fbf6ea; font-size: 15px;
+  }
+  .cell .val .swatch {
+    display: inline-block; width: 15px; height: 15px;
+    border-radius: 3px; margin-right: 7px;
+    vertical-align: -2px; border: 1px solid rgba(0,0,0,.12);
+  }
+
+  .list-block { margin-bottom: 14px; }
+  .list-block .label { font-size: 12px; color: #a0977f; margin-bottom: 7px; letter-spacing: .2em; }
+  .list-block .items { display: flex; flex-wrap: wrap; gap: 8px; }
+  .list-block .items span {
+    background: #f2e8d2;
+    border: 1px solid #e2d5b4;
+    border-radius: 999px;
+    font-size: 13px;
+    padding: 4px 12px;
+    color: #5d5341;
+  }
+  .list-block.bad .items span { background: #f6e3dd; border-color: #e3c3ba; color: #8a4a3d; }
+
+  .omikuji .quote {
+    border-top: 1px dashed #d8c9a5;
+    margin-top: 6px; padding-top: 14px;
+    font-size: 14px; line-height: 1.8;
+    color: #7a6a4d;
+    text-align: center;
+  }
+
+  .result-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: center; }
+  .result-actions .btn { width: auto; padding: 11px 24px; }
+
+  .disclaimer {
+    text-align: center; font-size: 12px; color: var(--sec);
+    margin-top: 20px; line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .board { padding: 28px 20px; }
+    .question { font-size: 17px; }
+    .omikuji .stamp { font-size: 16px; top: 10px; right: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-home" href="../">← 返回测试选择</a>
+
+<div class="board">
+
+  <!-- 开始页 -->
+  <div class="screen active" id="screen-start">
+    <div class="brand">
+      <div class="star">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.3 5.8.5-4.4 3.8 1.3 5.7L12 14.2l-5.1 3.1 1.3-5.7L3.8 7.8l5.8-.5L12 2zm0 15.5l1.8 2.8-1.8 4-1.8-4 1.8-2.8z"/></svg>
+      </div>
+      <h1>今日运势灵签</h1>
+      <p>回答五个轻松的小问题，<br>摇一摇签筒，看看今天的运势签说了什么。</p>
+    </div>
+    <div class="chips">
+      <span>5 题 · 随机抽题</span><span>约 1 分钟</span><span>纯属娱乐</span>
+    </div>
+    <div class="notice">
+      签运由你的答案与今天的日期共同决定——同一天、同样的答案会抽出同一支签，
+      换个答案或明天再来，签运就不同了。
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">开始求签</button>
+  </div>
+
+  <!-- 答题页 -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-info">
+      <span id="progress-text">第 1 / 5 题</span>
+      <span id="progress-percent">20%</span>
+    </div>
+    <div class="progress-bar"><div class="fill" id="progress-fill"></div></div>
+
+    <div class="question" id="question-text"></div>
+    <div class="options" id="options"></div>
+
+    <div class="quiz-footer">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()">上一题</button>
+      <button class="btn btn-ghost" id="btn-next" onclick="nextQuestion()" disabled>下一题</button>
+    </div>
+  </div>
+
+  <!-- 抽签页 -->
+  <div class="screen" id="screen-draw">
+    <div class="draw-stage" id="draw-stage">
+      <h2>心境已明，可以求签了</h2>
+      <p class="hint">静心默念想问的事，摇动签筒</p>
+      <div class="tube-wrap" id="tube-wrap">
+        <div class="stick s1"></div>
+        <div class="stick s2"></div>
+        <div class="stick s3"></div>
+        <div class="stick s4"></div>
+        <div class="stick s5"></div>
+        <div class="tube"></div>
+      </div>
+      <button class="btn btn-primary" style="max-width:240px;margin:0 auto;" id="btn-draw" onclick="drawFortune()">摇动签筒</button>
+    </div>
+  </div>
+
+  <!-- 结果页 -->
+  <div class="screen" id="screen-result">
+    <div class="omikuji" id="omikuji"></div>
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="restart()">再抽一次</button>
+      <a class="btn btn-ghost" style="display:flex;align-items:center;" href="../">返回选择</a>
+    </div>
+    <p class="disclaimer">本签文纯属娱乐，请勿用于任何真实决策。<br>真正的好运，来自你今天做的每件小事。</p>
+  </div>
+
+</div>
+
+<script>
+  // ===== 题库：每轮从中随机抽取 QUIZ_COUNT 题 =====
+  const QUESTION_POOL = [
+    { q: '清晨睁眼的第一瞬间，你的状态更像？', opts: ['神清气爽，一步下床', '还能再睡五分钟', '灵魂尚未归位', '昨晚的梦还在播续集'] },
+    { q: '出门前你最后检查的一件事是？', opts: ['钥匙手机钱包', '发型有没有乱', '今天天气如何', '门到底锁没锁'] },
+    { q: '今天最想喝的饮料是？', opts: ['一壶热茶', '续命咖啡', '快乐肥宅奶茶', '冰镇可乐'] },
+    { q: '如果今天遇到岔路，你会？', opts: ['走熟悉的大路', '试试小路', '看当时心情', '原地打开导航'] },
+    { q: '今晚最理想的状态是？', opts: ['早早睡觉', '追剧到满足', '和朋友聊到深夜', '游戏打到尽兴'] },
+    { q: '挑选今天的出门 BGM，你会放？', opts: ['轻快的流行曲', '安静的纯音乐', '带感的热血歌', '随机歌单听天由命'] },
+    { q: '今天的天气在你眼里是？', opts: ['阳光正好', '云朵散步', '细雨绵绵', '风有点调皮'] },
+    { q: '此刻桌面（或工作台）的状态是？', opts: ['整齐有序', '乱中有序', '创意的混沌', '刚好能放下一杯水'] },
+    { q: '如果今天有一小时完全空闲，你会？', opts: ['出门走走透透气', '补个觉', '刷刷手机', '捣鼓点小爱好'] },
+    { q: '今天最有信心完成的事是？', opts: ['一件拖了很久的事', '日常小事稳稳搞定', '给未来做个小计划', '活着就已经很棒了'] },
+    { q: '遇到一只猫/狗挡路，你会？', opts: ['蹲下撸一把', '绕道不打扰', '拍张照留念', '互相凝视三秒'] },
+    { q: '今天的午餐你会选？', opts: ['熟悉的常吃的', '最近馋的一家', '看哪家排队少', '打开外卖软件轮盘'] },
+    { q: '收到一条"在吗"的消息，你的第一反应？', opts: ['秒回：在的', '忙完再回', '心里咯噔一下', '先看看什么事'] },
+    { q: '如果今天送你一朵花，你希望是？', opts: ['向日葵', '小雏菊', '玫瑰', '尤加利叶'] },
+    { q: '今晚抬头看到月亮，你会许愿吗？', opts: ['会，认真许', '随便想一个', '只看不吃许', '对着星星一起许'] },
+    { q: '今天的脚步，更像哪种节奏？', opts: ['风风火火小跑', '稳步匀速前进', '慢悠悠地晃', '时快时慢看心情'] },
+    { q: '如果今天是一部电影，它会是？', opts: ['热血冒险片', '温馨治愈片', '悬疑烧脑片', '轻松喜剧片'] },
+    { q: '电梯来了但快关门，你会？', opts: ['冲刺一下赶上', '算了等下一趟', '帮忙按住开门键', '假装本来就没要走'] },
+    { q: '今天的口袋/包里，最可能翻出什么？', opts: ['一堆小票', '没用的糖果', '备用数据线', '去年的电影票根'] },
+    { q: '手机弹出一条好消息，你希望是？', opts: ['工资/红包到账', '期待的事有进展', '老朋友的消息', '外卖提前送达'] },
+    { q: '挑一种今天的随身小物代表心情？', opts: ['软软的解压捏捏', '清凉的薄荷糖', '顺手的便利贴', '保平安的小挂件'] },
+    { q: '如果今天下暴雨又没带伞，你会？', opts: ['等雨停顺便发呆', '潇洒淋回去', '买把伞顺路购物', '求助朋友来接'] },
+    { q: '今天的运气你直觉打几分？', opts: ['满分，迷之自信', '还行，稳中有升', '一般般，平常心', '不可说，说了就不灵了'] },
+    { q: '睡前最后一件做的事多半是？', opts: ['设好三个闹钟', '再刷十分钟手机', '回顾今天的小确幸', '倒头就睡从不纠结'] }
+  ];
+
+  const QUIZ_COUNT = 5;   // 每轮抽取的题目数量
+
+  // ===== 运势数据 =====
+  const LEVELS = [
+    { name: '大凶', weight: .08, stars: 1, color: '#8a4a3d' },
+    { name: '小凶', weight: .14, stars: 2, color: '#a2652e' },
+    { name: '平',   weight: .22, stars: 3, color: '#718096' },
+    { name: '小吉', weight: .24, stars: 4, color: '#3f7d4e' },
+    { name: '中吉', weight: .20, stars: 5, color: '#2f6ea8' },
+    { name: '大吉', weight: .12, stars: 5, color: '#b5493c' }
+  ];
+
+  const QUOTES = {
+    '大吉': '春风得意马蹄疾。今日诸事皆宜，放手去做，好运站在你这边。',
+    '中吉': '稳中向好。坚持手中的事，不必声张，自有回响。',
+    '小吉': '小有惊喜。留意身边不经意的好意，都藏着运气。',
+    '平': '平常心是道。今天不适合争，适合养精蓄锐。',
+    '小凶': '诸事微涩。缓一步、少纠结，明日自有转机。',
+    '大凶': '潜龙勿用。今日低调行事，忌硬刚，重大决定改天再做。'
+  };
+
+  const LUCKY_COLORS = [
+    { name: '雾蓝', hex: '#5b8db8' }, { name: '松石绿', hex: '#2e8b8b' },
+    { name: '暖橙', hex: '#e8833a' }, { name: '芥末黄', hex: '#d9b529' },
+    { name: '藕荷紫', hex: '#9a7ba6' }, { name: '砖红', hex: '#b5493c' },
+    { name: '月白', hex: '#e8ecf1' }, { name: '黛青', hex: '#2f4154' }
+  ];
+
+  const DO_LIST = [
+    '摸鱼十分钟', '给老朋友发条消息', '整理桌面', '尝试一条新路线',
+    '早睡半小时', '吃点甜的', '清掉拖延的小事', '夸一夸自己',
+    '午间散步', '随手帮人一把'
+  ];
+  const AVOID_LIST = [
+    '熬夜刷手机', '冲动消费', '与人抬杠', '空腹喝咖啡',
+    '临时改计划', '钻牛角尖', '暴饮暴食', '带怒气回复消息',
+    '拖延重要的事', '深夜做决定'
+  ];
+
+  // ===== 状态与流程 =====
+  let current = 0;
+  let answers = [];   // 记录选项文本
+  let quizItems = []; // 本轮抽到的题目
+
+  const $ = id => document.getElementById(id);
+
+  function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+  }
+
+  // 从题库中随机抽取不重复的题目
+  function pickQuestions() {
+    const pool = QUESTION_POOL.slice();
+    const picked = [];
+    const count = Math.min(QUIZ_COUNT, pool.length);
+    for (let i = 0; i < count; i++) {
+      picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    }
+    return picked;
+  }
+
+  function startQuiz() {
+    current = 0;
+    quizItems = pickQuestions();
+    answers = new Array(quizItems.length).fill(null);
+    renderQuestion();
+    switchScreen('screen-quiz');
+  }
+
+  function renderQuestion() {
+    const total = quizItems.length;
+    const item = quizItems[current];
+    $('question-text').textContent = item.q;
+
+    $('progress-text').textContent = `第 ${current + 1} / ${total} 题`;
+    const percent = Math.round((current + 1) / total * 100);
+    $('progress-percent').textContent = percent + '%';
+    $('progress-fill').style.width = percent + '%';
+
+    $('options').innerHTML = item.opts.map((label, i) => `
+      <button class="option ${answers[current] === label ? 'selected' : ''}"
+              onclick="selectOption(${i})">
+        <span class="dot"></span><span>${label}</span>
+      </button>`).join('');
+
+    $('btn-prev').disabled = current === 0;
+    const isLast = current === total - 1;
+    const nextBtn = $('btn-next');
+    nextBtn.textContent = isLast ? '前往求签' : '下一题';
+    nextBtn.disabled = answers[current] === null;
+  }
+
+  function selectOption(i) {
+    answers[current] = quizItems[current].opts[i];
+    renderQuestion();
+    if (current < quizItems.length - 1) {
+      setTimeout(() => { current++; renderQuestion(); }, 250);
+    }
+  }
+
+  function nextQuestion() {
+    if (answers[current] === null) return;
+    if (current < quizItems.length - 1) { current++; renderQuestion(); }
+    else switchScreen('screen-draw');
+  }
+
+  function prevQuestion() {
+    if (current > 0) { current--; renderQuestion(); }
+  }
+
+  // ===== 抽签与结果 =====
+  let drawing = false;
+
+  function drawFortune() {
+    if (drawing) return;
+    drawing = true;
+    $('btn-draw').disabled = true;
+    $('btn-draw').textContent = '摇签中…';
+    $('tube-wrap').classList.add('drawing');
+
+    setTimeout(() => {
+      $('tube-wrap').classList.remove('drawing');
+      drawing = false;
+      showResult();
+    }, 1700);
+  }
+
+  // 简易字符串哈希，保证同答案+同日期结果固定
+  function seedHash(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+      h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+    }
+    return h;
+  }
+
+  function showResult() {
+    const d = new Date();
+    const dateStr = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    const h = seedHash(dateStr + '|' + answers.join('|'));
+
+    // 按权重落位运势等级
+    const r = (h % 1000) / 1000;
+    let acc = 0, level = LEVELS[0];
+    for (const lv of LEVELS) {
+      acc += lv.weight;
+      if (r <= acc) { level = lv; break; }
+    }
+
+    const luckyNum = h % 9 + 1;
+    const color = LUCKY_COLORS[(h >>> 3) % LUCKY_COLORS.length];
+    const dos = [DO_LIST[(h >>> 5) % DO_LIST.length], DO_LIST[(h >>> 8) % DO_LIST.length]];
+    const avoids = [AVOID_LIST[(h >>> 6) % AVOID_LIST.length], AVOID_LIST[(h >>> 10) % AVOID_LIST.length]];
+    if (dos[0] === dos[1]) dos[1] = DO_LIST[(h >>> 12) % DO_LIST.length];
+    if (avoids[0] === avoids[1]) avoids[1] = AVOID_LIST[(h >>> 13) % AVOID_LIST.length];
+
+    const starSvg = on => `<svg viewBox="0 0 24 24" fill="${on ? '#c9a227' : '#e0d6bd'}"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.7l-6.2 3.6 1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>`;
+
+    $('omikuji').innerHTML = `
+      <div class="top-noise">第 ${h % 100} 签 · ${dateStr}</div>
+      <div class="stamp" style="color:${level.color};border-color:${level.color}">${level.name}</div>
+      <h2>今日运势</h2>
+      <div class="stars">${starSvg(true).repeat(level.stars)}${starSvg(false).repeat(5 - level.stars)}</div>
+      <div class="grid">
+        <div class="cell">
+          <div class="label">幸运数字</div>
+          <div class="val"><span class="num">${luckyNum}</span></div>
+        </div>
+        <div class="cell">
+          <div class="label">幸运色</div>
+          <div class="val"><span class="swatch" style="background:${color.hex}"></span>${color.name}</div>
+        </div>
+      </div>
+      <div class="list-block">
+        <div class="label">今日宜</div>
+        <div class="items">${dos.map(t => `<span>${t}</span>`).join('')}</div>
+      </div>
+      <div class="list-block bad">
+        <div class="label">今日忌</div>
+        <div class="items">${avoids.map(t => `<span>${t}</span>`).join('')}</div>
+      </div>
+      <div class="quote">「${QUOTES[level.name]}」</div>
+    `;
+
+    switchScreen('screen-result');
+  }
+
+  function restart() {
+    $('btn-draw').disabled = false;
+    $('btn-draw').textContent = '摇动签筒';
+    startQuiz();
+  }
+</script>
+</body>
+</html>
