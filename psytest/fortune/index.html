@@ -314,6 +314,11 @@
     text-align: center; font-size: 12px; color: var(--sec);
     margin-top: 20px; line-height: 1.7;
   }
+  .countdown {
+    text-align: center; font-size: 13px; color: var(--sec);
+    margin-top: 14px; line-height: 1.7;
+  }
+  .countdown .time { color: var(--link); font-weight: 600; font-variant-numeric: tabular-nums; }
 
   @media (max-width: 480px) {
     .board { padding: 28px 20px; }
@@ -338,11 +343,11 @@
       <p>回答五个轻松的小问题，<br>摇一摇签筒，看看今天的运势签说了什么。</p>
     </div>
     <div class="chips">
-      <span>5 题 · 随机抽题</span><span>约 1 分钟</span><span>纯属娱乐</span>
+      <span>5 题 · 随机抽题</span><span>约 1 分钟</span><span>每天一签</span>
     </div>
     <div class="notice">
-      签运由你的答案与今天的日期共同决定——同一天、同样的答案会抽出同一支签，
-      换个答案或明天再来，签运就不同了。
+      签运由你的答案与今天的日期共同决定，<b>每人每天只能求一签</b>，
+      抽出的签会保存在本浏览器中，明天零点后可再抽新签。
     </div>
     <button class="btn btn-primary" onclick="startQuiz()">开始求签</button>
   </div>
@@ -385,9 +390,10 @@
   <div class="screen" id="screen-result">
     <div class="omikuji" id="omikuji"></div>
     <div class="result-actions">
-      <button class="btn btn-primary" onclick="restart()">再抽一次</button>
+      <button class="btn btn-primary" id="btn-again" onclick="restart()">再抽一次</button>
       <a class="btn btn-ghost" style="display:flex;align-items:center;" href="../">返回选择</a>
     </div>
+    <p class="countdown" id="countdown" style="display:none;"></p>
     <p class="disclaimer">本签文纯属娱乐，请勿用于任何真实决策。<br>真正的好运，来自你今天做的每件小事。</p>
   </div>
 
@@ -467,10 +473,56 @@
   let quizItems = []; // 本轮抽到的题目
 
   const $ = id => document.getElementById(id);
+  const STORE_KEY = 'fortune_last_draw';
 
   function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     $(id).classList.add('active');
+  }
+
+  // ===== 每日一签：localStorage 记录 =====
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  // 读取今天的签记录，返回 { html } 或 null
+  function loadTodayDraw() {
+    try {
+      const rec = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+      if (rec && rec.date === todayStr()) return rec;
+    } catch (e) { /* 数据损坏时视为未抽 */ }
+    return null;
+  }
+
+  function saveTodayDraw(omikujiHtml) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ date: todayStr(), html: omikujiHtml }));
+    } catch (e) { /* 存储不可用时静默降级，仅本次会话有效 */ }
+  }
+
+  // 倒计时到明天零点
+  let countdownTimer = null;
+  function startCountdown() {
+    const el = $('countdown');
+    el.style.display = 'block';
+    const tick = () => {
+      const now = new Date();
+      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      let diff = Math.max(0, next - now);
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor(diff % 3600000 / 60000);
+      const s = Math.floor(diff % 60000 / 1000);
+      const pad = n => String(n).padStart(2, '0');
+      el.innerHTML = `今日签已求，明天零点后可再抽<br>距新签刷新还有 <span class="time">${pad(h)}:${pad(m)}:${pad(s)}</span>`;
+      if (diff === 0) {
+        clearInterval(countdownTimer);
+        location.reload();  // 零点自动刷新进入新的一天
+        return;
+      }
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
   }
 
   // 从题库中随机抽取不重复的题目
@@ -485,11 +537,27 @@
   }
 
   function startQuiz() {
+    // 当天已抽过签：直接回看结果，不再答题
+    const drawn = loadTodayDraw();
+    if (drawn) {
+      $('omikuji').innerHTML = drawn.html;
+      lockResultScreen();
+      switchScreen('screen-result');
+      return;
+    }
     current = 0;
     quizItems = pickQuestions();
     answers = new Array(quizItems.length).fill(null);
     renderQuestion();
     switchScreen('screen-quiz');
+  }
+
+  // 当天已抽：锁定「再抽一次」并显示倒计时
+  function lockResultScreen() {
+    const again = $('btn-again');
+    again.disabled = true;
+    again.textContent = '今日已求签';
+    startCountdown();
   }
 
   function renderQuestion() {
@@ -581,7 +649,7 @@
 
     const starSvg = on => `<svg viewBox="0 0 24 24" fill="${on ? '#c9a227' : '#e0d6bd'}"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.7l-6.2 3.6 1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>`;
 
-    $('omikuji').innerHTML = `
+    const omikujiHtml = `
       <div class="top-noise">第 ${h % 100} 签 · ${dateStr}</div>
       <div class="stamp" style="color:${level.color};border-color:${level.color}">${level.name}</div>
       <h2>今日运势</h2>
@@ -607,10 +675,22 @@
       <div class="quote">「${QUOTES[level.name]}」</div>
     `;
 
+    $('omikuji').innerHTML = omikujiHtml;
+
+    // 每日一签：保存今天的结果
+    saveTodayDraw(omikujiHtml);
+    lockResultScreen();
+
     switchScreen('screen-result');
   }
 
   function restart() {
+    // 当天已抽过：仅回看，不能重抽
+    if (loadTodayDraw()) { lockResultScreen(); switchScreen('screen-result'); return; }
+    $('btn-again').disabled = false;
+    $('btn-again').textContent = '再抽一次';
+    $('countdown').style.display = 'none';
+    if (countdownTimer) clearInterval(countdownTimer);
     $('btn-draw').disabled = false;
     $('btn-draw').textContent = '摇动签筒';
     startQuiz();
