@@ -776,32 +776,8 @@
     if ($SM.get('playStats.audioAlertShown')) {
       return;
     }
-
-    // Tell new users that there's sound now!
     $SM.set('playStats.audioAlertShown', true);
-    Events.startEvent({
-      title: _('Sound Available!'),
-      scenes: {
-        start: {
-          text: [
-            _('ears flooded with new sensations.'),
-            _('perhaps silence is safer?')
-          ],
-          buttons: {
-            'yes': {
-              text: _('enable audio'),
-              nextScene: 'end',
-              onChoose: () => Engine.toggleVolume(true)
-            },
-            'no': {
-              text: _('disable audio'),
-              nextScene: 'end',
-              onChoose: () => Engine.toggleVolume(false)
-            }
-          }
-        }
-      }
-    });
+    Engine.toggleVolume(true);
   }
 
 })();
